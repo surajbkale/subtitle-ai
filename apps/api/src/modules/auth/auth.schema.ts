@@ -5,7 +5,13 @@ export const registerSchema = z.object({
     .string()
     .email()
     .transform((val) => val.toLowerCase().trim()),
-  password: z.string().min(8),
+  password: z
+    .string()
+    .min(8)
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/,
+      "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character",
+    ),
 });
 
 export const loginSchema = z.object({

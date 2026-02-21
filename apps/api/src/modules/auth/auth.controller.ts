@@ -9,12 +9,15 @@ import {
 import { verifyRefreshToken } from "../../utils/jwt";
 import { BadRequestError, UnauthorizedError } from "../../errors/HttpErrors";
 
+const refreshCookieSameSite: "lax" | "strict" | "none" =
+  (process.env.REFRESH_COOKIE_SAMESITE as "lax" | "strict" | "none") || "lax";
+
 function setRefreshCookie(res: Response, token: string) {
   res.cookie("refreshToken", token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-    path: "/auth/refresh",
+    sameSite: refreshCookieSameSite,
+    path: "/auth",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 }
