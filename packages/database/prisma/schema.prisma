@@ -14,40 +14,18 @@ datasource db {
 }
 
 model User {
-  id          String    @id @default(uuid())
-  email       String    @unique
-  name        String?
-  password    String
-  createdAt   DateTime  @default(now())
-  videos      Video[]
+  id              String        @id   @default(uuid())
+  email           String        @unique
+  password        String?
+  provider        AuthProvider  @default(LOCAL)
+  providerId      String?
+  refreshToken    String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt @default(now())
 }
 
-model Video {
-  id              String    @id @default(uuid())
-  title           String    @default("Untitled Video")
-  userId          String
-  user            User      @relation(fields: [userId], references: [id])
-
-  uploadUrl       String
-  duration        Float?
-
-  status          VideoStatus  @default(QUEUED)
-
-  transcription   Json?
-
-  styleConfig     Json?
-
-  finalVideoUrl   String?
-
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
-}
-
-enum VideoStatus {
-  QUEUED
-  PROCESSING
-  TRANSCRIBED
-  BURNING
-  COMPLETED
-  FAILED
+enum AuthProvider {
+  LOCAL
+  GOOGLE
+  GITHUB
 }
