@@ -8,7 +8,7 @@ import {
 import { ConflictError, UnauthorizedError } from "../../errors/HttpErrors";
 
 export async function registerUser(email: string, password: string) {
-  return client.$transaction(async (tx) => {
+  return client.$transaction(async (tx: any) => {
     const existing = await tx.user.findUnique({
       where: { email },
     });
@@ -32,7 +32,7 @@ export async function registerUser(email: string, password: string) {
 }
 
 export async function loginUser(email: string, password: string) {
-  return client.$transaction(async (tx) => {
+  return client.$transaction(async (tx: any) => {
     const user = await tx.user.findUnique({
       where: { email },
     });
@@ -52,7 +52,7 @@ export async function loginUser(email: string, password: string) {
 }
 
 export async function refreshSession(refreshToken: string) {
-  return client.$transaction(async (tx) => {
+  return client.$transaction(async (tx: any) => {
     const decoded = verifyRefreshToken(refreshToken);
 
     const user = await tx.user.findUnique({
