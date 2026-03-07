@@ -6,7 +6,6 @@ import authRoutes from "./modules/auth/auth.route";
 import videoRoutes from "./modules/video/video.routes";
 import { errorMiddleware } from "./middlewares/error.middleware";
 import dotenv from "dotenv";
-import { authMiddleware } from "./middlewares/auth.middleware";
 dotenv.config();
 
 const app = express();

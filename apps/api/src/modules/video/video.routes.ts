@@ -1,16 +1,12 @@
 import { Router } from "express";
-import { upload } from "../../middlewares/upload.middleware";
 import { authMiddleware } from "../../middlewares/auth.middleware";
-import { uploadVideoController } from "./video.controller";
 import { asyncHandler } from "../../utils/asyncHandler";
+import { createUploadUrl, completeUpload } from "./video.controller";
 
 const router: Router = Router();
 
-router.post(
-  "/upload",
-  authMiddleware,
-  upload.single("video"),
-  asyncHandler(uploadVideoController),
-);
+router.post("/upload-url", authMiddleware, asyncHandler(createUploadUrl));
+
+router.post("/:id/complete", authMiddleware, asyncHandler(completeUpload));
 
 export default router;
