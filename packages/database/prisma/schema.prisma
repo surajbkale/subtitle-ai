@@ -23,8 +23,6 @@ model User {
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @default(now()) @updatedAt
   Video        Video[]
-
-  @@index([id, email])
 }
 
 model Video {
