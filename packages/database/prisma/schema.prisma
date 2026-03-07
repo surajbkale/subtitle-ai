@@ -14,18 +14,44 @@ datasource db {
 }
 
 model User {
-  id              String        @id   @default(uuid())
-  email           String        @unique
-  password        String?
-  provider        AuthProvider  @default(LOCAL)
-  providerId      String?
-  refreshToken    String?
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt @default(now())
+  id           String       @id @default(uuid())
+  email        String       @unique
+  password     String?
+  provider     AuthProvider @default(LOCAL)
+  providerId   String?
+  refreshToken String?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @default(now()) @updatedAt
+  Video        Video[]
+}
+
+model Video {
+  id           String      @id @default(uuid())
+  userId       String
+  originalName String
+  mimeType     String
+  size         Int
+  s3Key        String
+  s3Url        String
+  status       VideoStatus @default(UPLOADING)
+  duration     Int?
+  createdAt    DateTime    @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
 }
 
 enum AuthProvider {
   LOCAL
   GOOGLE
   GITHUB
+}
+
+enum VideoStatus {
+  UPLOADING
+  UPLOADED
+  PROCESSING
+  COMPLETED
+  FAILED
 }

@@ -3,6 +3,7 @@ import cors from "cors";
 import { client } from "@repo/database";
 import cookieParser from "cookie-parser";
 import authRoutes from "./modules/auth/auth.route";
+import videoRoutes from "./modules/video/video.routes";
 import { errorMiddleware } from "./middlewares/error.middleware";
 import dotenv from "dotenv";
 dotenv.config();
@@ -21,6 +22,7 @@ app.get("/health", async (_req, res) => {
 });
 
 app.use("/auth", authRoutes);
+app.use("/videos", videoRoutes);
 
 app.use(errorMiddleware);
 
