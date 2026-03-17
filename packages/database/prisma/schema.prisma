@@ -33,6 +33,7 @@ model Video {
   size         Int
   s3Key        String
   s3Url        String
+  audioKey     String?
   status       VideoStatus @default(UPLOADING)
   duration     Int?
   createdAt    DateTime    @default(now())
@@ -51,7 +52,8 @@ enum AuthProvider {
 enum VideoStatus {
   UPLOADING
   UPLOADED
-  PROCESSING
-  COMPLETED
+  PROCESSING_AUDIO
+  TRANSCRIBING
+  SUBTITLES_READY
   FAILED
 }

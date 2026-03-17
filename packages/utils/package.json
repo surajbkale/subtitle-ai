@@ -1,0 +1,20 @@
+{
+  "name": "@repo/utils",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "exports": {
+    "./redis": "./src/redis.ts",
+    "./video-queue": "./src/video.queue.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bullmq": "^5.70.4",
+    "ioredis": "^5.10.0"
+  }
+}
