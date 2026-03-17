@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { createVideoRecord, markVideoUploaded } from "./video.service";
 import { generateUploadUrl } from "./video.upload";
 import { BadRequestError } from "../../errors/HttpErrors";
+import { VideoQueue } from "../../queues/video.queue";
 
 export async function createUploadUrl(req: Request, res: Response) {
   const user = (req as any).user;
@@ -36,6 +37,10 @@ export async function completeUpload(req: Request, res: Response) {
   }
 
   const video = await markVideoUploaded(id);
+
+  await VideoQueue.add("process-video", {
+    videoId: video.id,
+  });
 
   return res.json({
     success: true,
