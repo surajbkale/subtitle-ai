@@ -8,7 +8,6 @@ import {
 import { pipeline } from "stream/promises";
 import fs from "fs";
 import ffmpeg from "fluent-ffmpeg";
-import path from "path";
 import { client } from "@repo/database";
 import { Readable } from "stream";
 
@@ -35,66 +34,77 @@ export async function extractAudio(videoId: string) {
   const tempAudio = `/tmp/${videoId}.mp3`;
 
   // Update status
-  await client.video.update({
-    where: { id: videoId },
-    data: { status: "PROCESSING" },
-  });
+  try {
+    await client.video.update({
+      where: { id: videoId },
+      data: { status: "PROCESSING_AUDIO" },
+    });
 
-  // Download video from S3
-  const command = new GetObjectCommand({
-    Bucket: process.env.AWS_S3_BUCKET!,
-    Key: video.s3Key,
-  });
-
-  const response = await s3.send(command);
-
-  if (!response.Body) {
-    throw new Error("S3 response body missing");
-  }
-
-  console.log("Streaming video to temp file...");
-
-  const stream = Readable.from(response.Body as any);
-
-  await pipeline(stream, fs.createWriteStream(tempVideo));
-
-  console.log("Video download completed");
-
-  console.log("Starting FFmpeg extraction...");
-  // Extract audio with FFmpeg
-  await new Promise((resolve, reject) => {
-    ffmpeg(tempVideo)
-      .noVideo()
-      .audioCodec("libmp3lame")
-      .save(tempAudio)
-      .on("end", resolve)
-      .on("error", reject);
-  });
-
-  // Upload audio to S3
-  const audioKey = `audio/${videoId}.mp3`;
-
-  await s3.send(
-    new PutObjectCommand({
+    // Download video from S3
+    const command = new GetObjectCommand({
       Bucket: process.env.AWS_S3_BUCKET!,
-      Key: audioKey,
-      Body: fs.createReadStream(tempAudio),
-      ContentType: "audio/mpeg",
-    }),
-  );
+      Key: video.s3Key,
+    });
 
-  // Update database
-  await client.video.update({
-    where: { id: videoId },
-    data: {
-      audioKey,
-      status: "COMPLETED",
-    },
-  });
+    const response = await s3.send(command);
 
-  // cleanup
-  fs.unlinkSync(tempVideo);
-  fs.unlinkSync(tempAudio);
+    if (!response.Body) {
+      throw new Error("S3 response body missing");
+    }
 
-  console.log("Audio extraction completed:", videoId);
+    console.log("Streaming video to temp file...");
+
+    const stream = Readable.from(response.Body as any);
+
+    await pipeline(stream, fs.createWriteStream(tempVideo));
+
+    console.log("Video download completed");
+
+    console.log("Starting FFmpeg extraction...");
+    // Extract audio with FFmpeg
+    await new Promise((resolve, reject) => {
+      ffmpeg(tempVideo)
+        .noVideo()
+        .audioCodec("libmp3lame")
+        .save(tempAudio)
+        .on("end", resolve)
+        .on("error", reject);
+    });
+
+    // Upload audio to S3
+    const audioKey = `audio/${videoId}.mp3`;
+
+    await s3.send(
+      new PutObjectCommand({
+        Bucket: process.env.AWS_S3_BUCKET!,
+        Key: audioKey,
+        Body: fs.createReadStream(tempAudio),
+        ContentType: "audio/mpeg",
+      }),
+    );
+
+    // Update database
+    await client.video.update({
+      where: { id: videoId },
+      data: {
+        audioKey,
+        status: "SUBTITLES_READY",
+      },
+    });
+
+    console.log("Audio extraction completed:", videoId);
+  } finally {
+    const filesToDelete = [tempVideo, tempAudio];
+    await Promise.all(
+      filesToDelete.map(async (file) => {
+        try {
+          await fs.promises.unlink(file);
+        } catch (error: any) {
+          if (error?.code !== "ENOENT") {
+            console.error(`Failed to delete temp file ${file}: ${error}`);
+          }
+        }
+      }),
+    );
+  }
 }

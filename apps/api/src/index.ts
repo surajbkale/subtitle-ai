@@ -5,7 +5,6 @@ import cookieParser from "cookie-parser";
 import authRoutes from "./modules/auth/auth.route";
 import videoRoutes from "./modules/video/video.routes";
 import { errorMiddleware } from "./middlewares/error.middleware";
-import "./workers/video.worker";
 import dotenv from "dotenv";
 dotenv.config();
 

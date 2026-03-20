@@ -15,6 +15,7 @@ export const videoWorker = new Worker(
       console.log("Job completed:", videoId);
     } catch (err) {
       console.error("Worker error:", err);
+      throw err;
     }
   },
   { connection: redis as unknown as ConnectionOptions },
